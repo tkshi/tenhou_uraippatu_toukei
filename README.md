@@ -1,0 +1,5 @@
+Install
+
+```
+ruby main.rb
+```

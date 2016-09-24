@@ -1,0 +1,7 @@
+mongo:
+  restart: always
+  image: mongo
+  ports:
+    - "27017:27017"
+  volumes:
+    - ./mongo/data:/data
