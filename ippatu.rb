@@ -15,10 +15,11 @@
 # # (データベースが存在しない場合はここで初めて作成される)
 # # id = coll.insert(doc)
 
+kyoku_text = ''
+rich_count = 0
+ippatu_count = 0
 kyoku_count = 0
-prev_labmen = ""
-ryu_kyoku_sum = 0
-ryu_kyoku_count = 0
+i = 0
 File.open('houton2015.txt', encoding: 'CP932:UTF-8') do |file|
     # IO#each_lineは1行ずつ文字列として読み込み、それを引数にブロックを実行する
     # 第1引数: 行の区切り文字列
@@ -28,24 +29,18 @@ File.open('houton2015.txt', encoding: 'CP932:UTF-8') do |file|
     # p i = i + 1
 
       # labmenには読み込んだ行が含まれる
-      if labmen =~ /流局(?!\/)/
-        ryu_kyoku_count = ryu_kyoku_count + 1
-        puts prev_labmen
-        puts labmen
-        ryu_kyoku_sum= ryu_kyoku_sum + prev_labmen.scan(/\-{1}[0-9]{4,5}/)[0].to_i
-        puts ryu_kyoku_sum
-        # p "流局数: #{ryu_kyoku_count}"
-        # p "罰符合計: #{ryu_kyoku_sum}"
-        # p "罰符平均: #{ryu_kyoku_sum / ryu_kyoku_count}"
+      kyoku_count = kyoku_count + 1 if labmen =~ /本場/
+      next unless labmen =~ /符.*点/
+      if labmen =~ /立直/
+          rich_count += 1
+          ippatu_count += 1 if labmen =~ /一発/
       end
-      prev_labmen = labmen
-
       # p "立直数: #{rich_count}"
       # p "一発数: #{ippatu_count}"
       # p "統計本場数: #{kyoku_count}"
   end
 end
 
-p "流局数: #{ryu_kyoku_count}"
-p "罰符合計: #{ryu_kyoku_sum}"
-p "罰符平均: #{ryu_kyoku_sum / ryu_kyoku_count}"
+p "立直数: #{rich_count}"
+p "一発数: #{ippatu_count}"
+p "統計本場数: #{kyoku_count}"
