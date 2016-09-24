@@ -14,38 +14,67 @@
 # # コレクションにドキュメントをインサート
 # # (データベースが存在しない場合はここで初めて作成される)
 # # id = coll.insert(doc)
+require './Oya'
 
 kyoku_count = 0
 prev_labmen = ""
 ryu_kyoku_sum = 0
 ryu_kyoku_count = 0
+tumo_count = 0
+tumo_sum = 0
+
+def convert_to_name_array(row)
+  row_array = row.scan(/\[[0-9]*\](.*?)(?=\/)/)
+  [row_array[0][0],row_array[1][0],row_array[2][0],row_array[3][0],]
+end
+
+def getKyokuSuu(row)
+  row_array = row.scan(/([1-4]{1})局/)[0][0].to_i
+end
+
+def getPlayerName(row)
+  row.split(' ')[2]
+end
+
+def getDaten(row)
+  row.scan(/\-[0-9]{4,5}/)[0].to_i
+end
+
+# p convert_to_name_array("持点25000 [1]nagisa11/七段/女 R2163 [2]ティカ-γ/八段/男 R2195 [3]riouchan/七段/男 R2081 [4]ふじお/七段/男 R2209")
+
+oya = Oya.new(['a','b','c','d'])
+# p oya.oya?(4,'a')
+
+sum = 0
+count = 0
+i = 0
 File.open('houton2015.txt', encoding: 'CP932:UTF-8') do |file|
-    # IO#each_lineは1行ずつ文字列として読み込み、それを引数にブロックを実行する
-    # 第1引数: 行の区切り文字列
-    # 第2引数: 最大の読み込みバイト数
-    # 読み込み用にオープンされていない場合にIOError
   file.each_line do |labmen|
-    # p i = i + 1
-
-      # labmenには読み込んだ行が含まれる
-      if labmen =~ /流局(?!\/)/
-        ryu_kyoku_count = ryu_kyoku_count + 1
-        puts prev_labmen
-        puts labmen
-        ryu_kyoku_sum= ryu_kyoku_sum + prev_labmen.scan(/\-{1}[0-9]{4,5}/)[0].to_i
-        puts ryu_kyoku_sum
-        # p "流局数: #{ryu_kyoku_count}"
-        # p "罰符合計: #{ryu_kyoku_sum}"
-        # p "罰符平均: #{ryu_kyoku_sum / ryu_kyoku_count}"
+    if labmen =~ /\[1\]/
+      plyaer_name = convert_to_name_array(labmen)
+      oya = Oya.new(plyaer_name)
+    end
+    if labmen =~ /ロン\s/
+      kyoku_suu = getKyokuSuu(prev_labmen)
+      name = getPlayerName(prev_labmen)
+      if oya.oya?(kyoku_suu,name)
+        sum = sum + getDaten(prev_labmen)
+        count = count + 1
+        p "数: #{count}"
+        p "合計点: #{sum}"
+        p "平均点: #{sum / count}"
+      else
+        # sum = sum + getDaten(prev_labmen)
+        # count = count + 1
+        # p "数: #{count}"
+        # p "合計点: #{sum}"
+        # p "平均点: #{sum / count}"
       end
-      prev_labmen = labmen
-
-      # p "立直数: #{rich_count}"
-      # p "一発数: #{ippatu_count}"
-      # p "統計本場数: #{kyoku_count}"
+    end
+    prev_labmen = labmen
   end
 end
 
-p "流局数: #{ryu_kyoku_count}"
-p "罰符合計: #{ryu_kyoku_sum}"
-p "罰符平均: #{ryu_kyoku_sum / ryu_kyoku_count}"
+p "数: #{count}"
+p "合計点: #{sum}"
+p "平均点: #{sum / count}"
